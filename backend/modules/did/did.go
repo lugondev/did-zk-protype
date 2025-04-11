@@ -333,9 +333,8 @@ func (s *DIDService) VerifyAuthentication(didID string, proofBytes []byte, signa
 	}
 
 	// Verify proof
-	err = groth16.Verify(g16Proof, s.authVk, publicWitness)
-	if err != nil {
-		return false, err
+	if err := groth16.Verify(g16Proof, s.authVk, publicWitness); err != nil {
+		return false, nil
 	}
 
 	return true, nil
@@ -489,7 +488,7 @@ func (s *DIDService) VerifyAgeProof(didID string, credentialID string, ageThresh
 		AgeThreshold:  ageThreshold,
 		AgeCommitment: commitment,
 	}
-	publicWitness, witnessErr := frontend.NewWitness(assignment, ecc.BN254.ScalarField())
+	publicWitness, witnessErr := frontend.NewWitness(assignment, ecc.BN254.ScalarField(), frontend.PublicOnly())
 	if witnessErr != nil {
 		return false, fmt.Errorf("failed to create witness verify age: %v", witnessErr)
 	}

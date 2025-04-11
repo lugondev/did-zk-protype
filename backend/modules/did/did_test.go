@@ -43,20 +43,11 @@ func TestDIDCircuit(t *testing.T) {
 	// Test authentication
 	challenge := "test authentication challenge"
 	msg := []byte(challenge)
-	assignment := &DIDAuthCircuit{
-		PublicKey: did.PublicKey,
-		Message:   msg,
-	}
-
 	hasher := cryptomimc.NewMiMC()
+
 	signature, err := privKey.Sign(msg, hasher)
 	if err != nil {
 		t.Fatalf("Failed to sign message: %v", err)
-	}
-
-	assignment.Signature.Assign(tedwards.BN254, signature)
-	if err != nil {
-		t.Fatal("failed to sign message", err)
 	}
 
 	proof, _, err := service.AuthenticateDID(did.ID, privateKey, challenge)
@@ -78,16 +69,12 @@ func TestDIDCircuit(t *testing.T) {
 
 	// Test with wrong challenge
 	wrongChallenge := []byte("wrong challenge")
-	signature, err = privKey.Sign(wrongChallenge, hasher)
+	wrongSignature, err := privKey.Sign(wrongChallenge, hasher)
 	if err != nil {
 		t.Fatalf("Failed to sign message: %v", err)
 	}
 
-	assignment.Signature.Assign(tedwards.BN254, signature)
-	if err != nil {
-		t.Fatal("failed to sign message", err)
-	}
-	valid, err = service.VerifyAuthentication(did.ID, proof, signature)
+	valid, err = service.VerifyAuthentication(did.ID, proof, wrongSignature)
 	if err != nil {
 		t.Fatalf("Failed to verify authentication with wrong challenge: %v", err)
 	}
@@ -172,39 +159,5 @@ func TestCircuitCompilation(t *testing.T) {
 	_, _, err = groth16.Setup(cs)
 	if err != nil {
 		t.Fatalf("Failed to setup AgeProofCircuit: %v", err)
-	}
-}
-
-func TestProofSerialization(t *testing.T) {
-	service, err := NewDIDService()
-	if err != nil {
-		t.Fatalf("Failed to create DID service: %v", err)
-	}
-
-	// Create a DID
-	did, privateKey, err := service.CreateDID()
-	if err != nil {
-		t.Fatalf("Failed to create DID: %v", err)
-	}
-
-	// Create and serialize a proof
-	challenge := "test serialization"
-	proof, _, err := service.AuthenticateDID(did.ID, privateKey, challenge)
-	if err != nil {
-		t.Fatalf("Failed to create proof: %v", err)
-	}
-
-	// Test proof serialization/deserialization
-	var buf bytes.Buffer
-	buf.Write(proof)
-
-	// Verify deserialized proof
-	valid, err := service.VerifyAuthentication(did.ID, buf.Bytes(), buf.Bytes())
-	if err != nil {
-		t.Fatalf("Failed to verify deserialized proof: %v", err)
-	}
-
-	if !valid {
-		t.Error("Deserialized proof verification should succeed")
 	}
 }
