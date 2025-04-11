@@ -85,10 +85,6 @@ func (circuit *DIDAuthCircuit) Define(api frontend.API) error {
 		return fmt.Errorf("failed to initialize MiMC: %w", err)
 	}
 
-	// Hash the message for verification
-	// mimc.Write(circuit.Message)
-	// hashedMessage := mimc.Sum()
-
 	// Verify signature
 	err = eddsa.Verify(curve, circuit.Signature, circuit.Message, circuit.PublicKey, &mimc)
 	if err != nil {
@@ -211,8 +207,6 @@ func (s *DIDService) CreateDID() (*DID, *big.Int, error) {
 	pubKeyBytes := pubKey.Bytes()
 
 	id := fmt.Sprintf("did:example:%x", pubKeyBytes)
-	fmt.Printf("Created DID: %s\n", id)
-	fmt.Printf("CreateDID private key: %x\n", privKey.Bytes())
 
 	// Create DID Document
 	document := DIDDocument{
@@ -237,7 +231,6 @@ func (s *DIDService) CreateDID() (*DID, *big.Int, error) {
 	// Convert to gnark public key format
 	gnarkPubKey := eddsa.PublicKey{}
 	gnarkPubKey.Assign(tedwards.BN254, pubKeyBytes)
-	fmt.Printf("gnarkPubKey public key: %x\n", gnarkPubKey)
 
 	// Save DID
 	did := DID{
@@ -256,7 +249,6 @@ func (s *DIDService) AuthenticateDID(didID string, privateKey *big.Int, challeng
 	if !ok {
 		return nil, nil, fmt.Errorf("DID does not exist: %s", didID)
 	}
-	fmt.Printf("Authenticating DID: %s\n", didID)
 
 	// Recreate EdDSA key from private key
 	seed := make([]byte, 32)
@@ -268,33 +260,22 @@ func (s *DIDService) AuthenticateDID(didID string, privateKey *big.Int, challeng
 		return nil, nil, fmt.Errorf("failed to create EdDSA private key: %v", err)
 	}
 
-	fmt.Printf("AuthenticateDID private key: %x\n", privKey.Bytes())
 	pubKey := privKey.Public()
 	pubKeyBytes := pubKey.Bytes()
 	gnarkPubKey := eddsa.PublicKey{}
 	gnarkPubKey.Assign(tedwards.BN254, pubKeyBytes)
-	fmt.Printf("gnarkPubKey public key: %x\n", gnarkPubKey)
 
 	// Hash the challenge to get a numeric value
 	hasher := cryptomimc.NewMiMC()
-	// hasher.Write([]byte(challenge))
-	// hashBytes := hasher.Sum(nil)
-	// msgBigInt := new(big.Int).SetBytes(hashBytes)
-	// fmt.Printf("Message: %s\n", msgBigInt.String())
 
 	// Sign the message
 	signature, err := privKey.Sign([]byte(challenge), hasher)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to sign challenge: %v", err)
 	}
-	fmt.Printf("Signature: %x len: %d\n", signature, len(signature))
 
 	gnarkSignature := eddsa.Signature{}
 	gnarkSignature.Assign(tedwards.BN254, signature)
-
-	// Debug logging
-	fmt.Printf("Debug Info:\n")
-	fmt.Printf("- Public Key: %x\n", did.PublicKey)
 
 	// Create the witness
 	assignment := &DIDAuthCircuit{
@@ -339,12 +320,6 @@ func (s *DIDService) VerifyAuthentication(didID string, proofBytes []byte, signa
 	if err != nil {
 		return false, fmt.Errorf("failed to read proof: %v", err)
 	}
-
-	// Hash the challenge to get a numeric value
-	// hasher := cryptomimc.NewMiMC()
-	// hasher.Write([]byte(challenge))
-	// hashBytes := hasher.Sum(nil)
-	// msgBigInt := new(big.Int).SetBytes(hashBytes)
 
 	// Create public witness object
 	assignment := &DIDAuthCircuit{
