@@ -9,6 +9,8 @@ A full-stack example implementation of a Decentralized Identity (DID) system usi
 - ✍️ EdDSA signatures for secure authentication
 - 🔒 Privacy-preserving credential verification
 - 🌐 Modern web interface with real-time DID operations
+- 📱 Responsive dashboard for credential management
+- 🔑 Client-side cryptographic operations
 
 ## Technology Stack
 
@@ -23,9 +25,9 @@ A full-stack example implementation of a Decentralized Identity (DID) system usi
 - Next.js 15.3.0
 - React 19
 - TypeScript
-- TailwindCSS
-- Noble Curves
-- TweetNaCl for cryptographic operations
+- TailwindCSS with shadcn/ui components
+- Noble Curves for cryptographic operations
+- TweetNaCl for additional crypto functionality
 
 ## Getting Started
 
@@ -39,84 +41,108 @@ A full-stack example implementation of a Decentralized Identity (DID) system usi
 1. Start the backend server:
 ```bash
 cd backend
+go mod download
 go run main.go
 ```
 The server will start on http://localhost:8080
 
 2. Start the frontend development server:
 ```bash
-cd frontend
+cd client
 pnpm install
 pnpm dev
 ```
 The frontend will be available at http://localhost:3000
 
-## API Endpoints
+## Project Structure
 
-The backend provides three main API endpoints:
+```
+.
+├── backend/                 # Go backend service
+│   ├── main.go             # HTTP server implementation
+│   ├── docs.md             # API documentation
+│   └── modules/
+│       ├── auth/           # Authentication
+│       ├── db/             # Database operations
+│       ├── did/            # DID operations
+│       ├── eddsa/          # EdDSA operations
+│       └── rollup/         # ZK rollup implementation
+└── client/                 # Next.js frontend
+    ├── src/
+    │   ├── app/           # Next.js pages and API routes
+    │   ├── components/    # React components
+    │   ├── lib/          # Utility functions
+    │   └── types/        # TypeScript definitions
+    └── public/           # Static assets
+```
 
-### 1. Create DID
-- **POST** `/api/did/create`
-- Creates a new DID with age credentials
+## Documentation
 
-### 2. Authenticate DID
-- **POST** `/api/did/authenticate`
-- Authenticates a DID using ZKP and EdDSA signatures
+- [Backend Documentation](backend/README.md)
+  - API endpoints
+  - Module architecture
+  - Security features
+  - Testing instructions
 
-### 3. Verify Authentication
-- **POST** `/api/did/verify`
-- Verifies DID authentication proofs and signatures
+- [Frontend Documentation](client/README.md)
+  - Component structure
+  - State management
+  - Security considerations
+  - Development guidelines
 
-For detailed API documentation and request/response formats, see [backend/docs.md](backend/docs.md).
+## Core Features
+
+### DID Management
+- Create and manage Decentralized Identifiers
+- Issue age credentials with privacy preservation
+- Authenticate using ZKP and EdDSA signatures
+
+### Zero-Knowledge Proofs
+- Age verification without revealing actual age
+- Groth16 proving system implementation
+- Privacy-preserving authentication
+
+### Security
+- Client-side cryptographic operations
+- Challenge-response authentication
+- Protection against replay attacks
+- Secure credential storage
+- Input validation and sanitization
 
 ## Development
 
 ### Backend Commands
 ```bash
 cd backend
-go run main.go     # Start the server
-go test ./...      # Run tests
+go test ./...      # Run all tests
+go test ./modules/did  # Test specific module
 ```
 
 ### Frontend Commands
 ```bash
-cd frontend
+cd client
 pnpm dev          # Start development server
 pnpm build        # Build for production
 pnpm start        # Start production server
 pnpm lint         # Run linting
 ```
 
-## Security Features
+## Browser Support
 
-- Zero-knowledge proofs for privacy-preserving age verification
-- EdDSA signatures for secure authentication
-- Challenge-response mechanism to prevent replay attacks
-- CORS protection
-- Input validation and sanitization
-
-## Project Structure
-
-```
-.
-├── backend/
-│   ├── main.go                 # HTTP server implementation
-│   ├── docs.md                 # API documentation
-│   └── modules/
-│       ├── did/               # DID operations
-│       ├── eddsa/            # EdDSA signature operations
-│       └── rollup/           # ZK rollup implementation
-└── frontend/
-    ├── src/
-    │   ├── app/              # Next.js app directory
-    │   ├── components/       # React components
-    │   └── types/           # TypeScript definitions
-    └── public/              # Static assets
-```
+- Chrome (latest)
+- Firefox (latest)
+- Safari (latest)
+- Edge (latest)
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+1. Fork the repository
+2. Create your feature branch: `git checkout -b feature/amazing-feature`
+3. Commit your changes: `git commit -m 'Add amazing feature'`
+4. Push to the branch: `git push origin feature/amazing-feature`
+5. Open a Pull Request
+
+For detailed contribution guidelines, see the README files in the respective submodules.
 
 ## License
 
